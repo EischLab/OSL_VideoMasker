@@ -1,0 +1,154 @@
+import os
+import cv2
+import numpy as np
+import threading
+from tqdm import tqdm
+
+# Global variables to store circle center and radius points
+center_point = (-1, -1)
+radius = -1
+circle_center_selected = False
+circle_radius_selected = False
+circle_preview = None
+
+def draw_circle(event, x, y, flags, param):
+    global center_point, radius, circle_center_selected, circle_radius_selected, circle_preview
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        if not circle_center_selected:
+            center_point = (x, y)
+            circle_center_selected = True
+        else:
+            radius = max(int(np.sqrt((x - center_point[0]) ** 2 + (y - center_point[1]) ** 2)), 0)
+            circle_radius_selected = True
+            circle_preview = None
+
+def get_confirmation():
+    while True:
+        confirmation = input("Are you okay with this circle? (Y/N): ")
+        if confirmation.lower() == 'y':
+            return True
+        elif confirmation.lower() == 'n':
+            return False
+        else:
+            print("Invalid input. Please enter 'Y' or 'N'.")
+
+def process_video(input_video_file):
+    # Create a new VideoCapture object
+    cap = cv2.VideoCapture(input_video_file)
+
+    # Get the video's frames per second (fps) and frame size
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Define the output file name with "_Masked" appended on the desktop
+    file_name_without_extension = os.path.splitext(os.path.basename(input_video_file))[0]
+    output_file = os.path.expanduser("~/Desktop/") + f"{file_name_without_extension}_Masked.mp4"
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Use 'XVID' for AVI format
+    out = cv2.VideoWriter(output_file, fourcc, fps, (frame_width, frame_height))
+
+    # Get the total number of frames in the video
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    # Process the video with the selected circle
+    with tqdm(total=total_frames, desc='Processing Frames', unit='frame') as pbar:
+        while True:
+            ret, frame = cap.read()
+
+            if not ret:
+                break
+
+            # Draw the red circle on the frame
+            cv2.circle(frame, center_point, radius, (0, 0, 255), -1)  # -1 fills the circle
+
+            # Write the modified frame to the output video
+            out.write(frame)
+
+            # Update the progress bar
+            pbar.update(1)
+
+    # Release video capture and writer objects
+    cap.release()
+    out.release()
+
+if __name__ == "__main__":
+    input_video_file = "/Users/primalkarma/Desktop/OSL Red Light July 25th 2023/NoneT1.mp4" # Replace the text with the pathway to your video file
+
+    # Read the input video
+    cap = cv2.VideoCapture(input_video_file)
+
+    # Get the first frame of the video
+    ret, first_frame = cap.read()
+
+    if not ret:
+        print("Error: Unable to read the first frame of the video.")
+        exit()
+
+    # Create a copy of the first frame for preview purposes
+    circle_preview = first_frame.copy()
+
+    # Display the first frame to select the circle center and radius
+    cv2.imshow('Video', first_frame)
+    cv2.setMouseCallback('Video', draw_circle)
+
+    while not circle_radius_selected:
+        frame_to_show = circle_preview.copy()
+
+        # Draw the red circle on the frame for preview
+        if circle_center_selected and radius >= 0:
+            cv2.circle(frame_to_show, center_point, radius, (0, 0, 255), -1)
+
+        cv2.imshow('Video', frame_to_show)
+
+        key = cv2.waitKey(1) & 0xFF
+
+        # Press 'q' to stop processing the video
+        if key == ord('q'):
+            break
+
+    # Destroy the OpenCV window
+    cv2.destroyAllWindows()
+
+    # If circle center and radius are selected, ask for confirmation
+    if circle_center_selected and circle_radius_selected:
+        while True:
+            # Display the first frame with the selected circle for confirmation
+            cv2.imshow('Video', first_frame)
+            cv2.circle(first_frame, center_point, radius, (0, 0, 255), -1)
+            cv2.putText(first_frame, "Confirm (Y) or Redo (N)", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.imshow('Video', first_frame)
+
+            confirmation = cv2.waitKey(0) & 0xFF
+
+            if confirmation == ord('y'):
+                # Close the OpenCV window
+                cv2.destroyAllWindows()
+                break
+            elif confirmation == ord('n'):
+                # Reset the circle points and preview image
+                center_point = (-1, -1)
+                radius = -1
+                circle_center_selected = False
+                circle_radius_selected = False
+                circle_preview = first_frame.copy()
+                # Close the OpenCV window (added here as well)
+                cv2.destroyAllWindows()
+            else:
+                print("Invalid input. Please press 'Y' to confirm or 'N' to redo.")
+
+    # If circle center and radius are selected, start video processing
+    if circle_center_selected and circle_radius_selected:
+        # Start a new thread for video processing and pass the input_video_file
+        video_thread = threading.Thread(target=process_video, args=(input_video_file,))
+        video_thread.start()
+
+        # Display a message to the user while video processing is running
+        print("Video processing is running in the background. Please wait...")
+
+        # Wait for the video processing thread to finish
+        video_thread.join()
+
+    print("Video processing is complete.")
