@@ -14,7 +14,7 @@ In the black terminal on your Visual Code Studio, or whatever program you are us
 You will need to do this for every video file, but this should be a lot easier for you. 
 
 
-████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 **GENERAL OVERVIEW OF CODE: SKIP IF YOU DONT CARE ABOUT HOW THE PROGRAM WORKS:**
 
