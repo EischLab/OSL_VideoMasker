@@ -17,6 +17,8 @@ You will need to do this for every video file, but this should be a lot easier f
 
 
 
+
+
 **GENERAL OVERVIEW OF CODE: SKIP IF YOU DONT CARE ABOUT HOW THE PROGRAM WORKS:**
 
 This Python script allows you to select a circular region in a video and process the video with the selected circular mask. Here's how the script works:
