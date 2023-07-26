@@ -11,10 +11,11 @@ In the black terminal on your Visual Code Studio, or whatever program you are us
 - This indicates that your video is being generated.
 - Your video will be generated and SAVED onto your desktop titled the same as your video you have chosen except with "_Masked" tacked to the end of the title.
 
-You will need to do this for every video file, but this should be a lot easier for you. 
+You will need to do this for every video file, but this should be a lot easier for you then using some online generator. 
 
 
-██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+
 
 **GENERAL OVERVIEW OF CODE: SKIP IF YOU DONT CARE ABOUT HOW THE PROGRAM WORKS:**
 
