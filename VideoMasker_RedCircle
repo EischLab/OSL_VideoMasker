@@ -75,7 +75,7 @@ def process_video(input_video_file):
     out.release()
 
 if __name__ == "__main__":
-    input_video_file = "/Users/primalkarma/Desktop/OSL Red Light July 25th 2023/NoneT1.mp4" # Replace the text with the pathway to your video file
+    input_video_file = "/Users/primalkarma/Desktop/Litter AI_20200723/AI.1.mp4" # Replace the text with the pathway to your video file
 
     # Read the input video
     cap = cv2.VideoCapture(input_video_file)
